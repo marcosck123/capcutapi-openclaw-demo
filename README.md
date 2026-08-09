@@ -68,24 +68,6 @@
 
 ---
 
-## 🎥 Product Showcase
-
-<div align="center">
-
-### 🐎 AI Generated Video Cases
-
-[![Horse Video](https://img.youtube.com/vi/IF1RDFGOtEU/hqdefault.jpg)](https://www.youtube.com/watch?v=IF1RDFGOtEU)
-
-### 🎵 Music Video Production
-
-[![Song Video](https://img.youtube.com/vi/rGNLE_slAJ8/hqdefault.jpg)](https://www.youtube.com/watch?v=rGNLE_slAJ8)
-
-*AI-driven video generation powered by CapCutAPI*
-
-</div>
-
----
-
 ## Demo: OpenClaw MCP Flow
 
 This repository now includes a reproducible OpenClaw-focused MCP demo that exercises the real `create_draft -> add_text -> save_draft` flow and stores the generated draft locally.
