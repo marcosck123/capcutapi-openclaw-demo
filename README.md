@@ -86,6 +86,36 @@
 
 ---
 
+## Demo: OpenClaw MCP Flow
+
+This repository now includes a reproducible OpenClaw-focused MCP demo that exercises the real `create_draft -> add_text -> save_draft` flow and stores the generated draft locally.
+
+![OpenClaw MCP demo](docs/demo/capcut-openclaw-demo.gif)
+
+### Run the demo
+
+```bash
+./.venv/bin/python demo/run_mcp_demo.py
+```
+
+The script:
+
+- starts `mcp_server.py`
+- initializes an MCP client
+- creates a portrait draft
+- adds styled text with shadow, background, and multi-style ranges
+- saves the generated draft under `demo/output/<draft_id>`
+
+### Regenerate the GIF used in this README
+
+```bash
+./.venv/bin/python demo/render_demo_gif.py
+```
+
+This command reruns the live demo and converts the terminal output into `docs/demo/capcut-openclaw-demo.gif`.
+
+---
+
 ## 🚀 Core Features
 
 ### 📋 Feature Matrix

@@ -15,3 +15,6 @@ config.json
 .venv/
 venv/
 tmp/
+demo/output/
+docs/demo/tmp/
+dfd_cat_*/

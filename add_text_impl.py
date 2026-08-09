@@ -168,18 +168,6 @@ def add_text_impl(
             vertical_offset=background_vertical_offset
         )
     
-    # 创建text_shadow (阴影)
-    text_shadow = None
-    if shadow_enabled:
-        text_shadow = draft.Text_shadow(
-            has_shadow=shadow_enabled,
-            alpha=shadow_alpha,
-            angle=shadow_angle,
-            color=shadow_color,
-            distance=shadow_distance,
-            smoothing=shadow_smoothing
-        )
-
     # Create bubble effect
     text_bubble = None
     if bubble_effect_id and bubble_resource_id:
@@ -218,7 +206,6 @@ def add_text_impl(
         clip_settings=draft.Clip_settings(transform_y=transform_y, transform_x=transform_x),
         border=text_border,
         background=text_background,
-        shadow=text_shadow,
         fixed_width=pixel_fixed_width,
         fixed_height=pixel_fixed_height
     )

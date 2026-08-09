@@ -16,6 +16,36 @@ from .animation import Segment_animations, Text_animation
 from .metadata import Font_type, Effect_meta
 from .metadata import Text_intro, Text_outro, Text_loop_anim
 
+class TextStyleRange:
+    """Represents a style override for a substring range."""
+
+    start: int
+    end: int
+    font_size: Optional[float]
+    font_color: Optional[str]
+    bold: bool
+    italic: bool
+    underline: bool
+
+    def __init__(
+        self,
+        *,
+        start: int,
+        end: int,
+        font_size: Optional[float] = None,
+        font_color: Optional[str] = None,
+        bold: bool = False,
+        italic: bool = False,
+        underline: bool = False,
+    ):
+        self.start = start
+        self.end = end
+        self.font_size = font_size
+        self.font_color = font_color
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+
 class Text_style:
     """字体样式类"""
 
@@ -219,6 +249,8 @@ class Text_segment(Visual_segment):
     """文本气泡效果, 在放入轨道时加入素材列表中"""
     effect: Optional[TextEffect]
     """文本花字效果, 在放入轨道时加入素材列表中, 目前仅支持一部分花字效果"""
+    style_ranges: list[TextStyleRange]
+    """Optional per-range style overrides"""
     
     fixed_width: float
     """固定宽度, -1表示不固定"""
@@ -255,9 +287,22 @@ class Text_segment(Visual_segment):
 
         self.bubble = None
         self.effect = None
+        self.style_ranges = []
         
         self.fixed_width = fixed_width
         self.fixed_height = fixed_height
+
+    @staticmethod
+    def _hex_to_color_tuple(color: Optional[str]) -> Optional[Tuple[float, float, float]]:
+        if not color or not isinstance(color, str):
+            return None
+        value = color.lstrip("#")
+        if len(value) != 6:
+            return None
+        try:
+            return tuple(int(value[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+        except ValueError:
+            return None
 
     @classmethod
     def create_from_template(cls, text: str, timerange: Timerange, template: "Text_segment") -> "Text_segment":
@@ -333,6 +378,10 @@ class Text_segment(Visual_segment):
         self.extra_material_refs.append(self.effect.global_id)
         return self
 
+    def add_text_style(self, style_range: TextStyleRange) -> "Text_segment":
+        self.style_ranges.append(style_range)
+        return self
+
     def export_material(self) -> Dict[str, Any]:
         """与此文本片段联系的素材, 以此不再单独定义Text_material类"""
         # 叠加各类效果的flag
@@ -342,27 +391,42 @@ class Text_segment(Visual_segment):
         if self.background:
             check_flag |= 16
 
-        content_json = {
-            "styles": [
-                {
-                    "fill": {
-                        "alpha": 1.0,
-                        "content": {
-                            "render_type": "solid",
-                            "solid": {
-                                "alpha": self.style.alpha,
-                                "color": list(self.style.color)
-                            }
-                        }
-                    },
-                    "range": [0, len(self.text)],
-                    "size": self.style.size,
-                    "bold": self.style.bold,
-                    "italic": self.style.italic,
-                    "underline": self.style.underline,
-                    "strokes": [self.border.export_json()] if self.border else []
+        base_style = {
+            "fill": {
+                "alpha": 1.0,
+                "content": {
+                    "render_type": "solid",
+                    "solid": {
+                        "alpha": self.style.alpha,
+                        "color": list(self.style.color)
+                    }
                 }
-            ],
+            },
+            "range": [0, len(self.text)],
+            "size": self.style.size,
+            "bold": self.style.bold,
+            "italic": self.style.italic,
+            "underline": self.style.underline,
+            "strokes": [self.border.export_json()] if self.border else []
+        }
+        styles = [base_style]
+
+        for style_range in self.style_ranges:
+            style_entry = deepcopy(base_style)
+            style_entry["range"] = [style_range.start, style_range.end]
+            if style_range.font_size is not None:
+                style_entry["size"] = style_range.font_size
+            if style_range.font_color:
+                color_tuple = self._hex_to_color_tuple(style_range.font_color)
+                if color_tuple:
+                    style_entry["fill"]["content"]["solid"]["color"] = list(color_tuple)
+            style_entry["bold"] = style_range.bold
+            style_entry["italic"] = style_range.italic
+            style_entry["underline"] = style_range.underline
+            styles.append(style_entry)
+
+        content_json = {
+            "styles": styles,
             "text": self.text
         }
         if self.font:
